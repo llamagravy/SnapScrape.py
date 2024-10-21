@@ -4,13 +4,13 @@ Downloads public Snapchat stories, profile picture, bio, backdrop image, and hig
 ## Saving this locally
 ```bash
 $ git clone https://github.com/llamagravy/SnapScrape.py.git
-$ pip3 install -r SnapScrape.py/requirements.txt
+$ pip3 install -r SnapScrape.py.git/requirements.txt
 ```
 
 ## Run it
 ```bash
 # Change to this directory & Make the script executable.
-$ cd SnapScrape.py  && chmod +x SnapScrape.py
+$ cd SnapScrape.py.git && chmod +x SnapScrape.py
 
 # Run the script.
 $ python3 SnapScrape.py
