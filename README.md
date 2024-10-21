@@ -1,23 +1,22 @@
-# SnapScrap.py
-Downloads public Snapchat stories in your System.
+# SnapScrape.py
+Downloads public Snapchat stories, profile picture, bio, backdrop image, and highlights in your system.
 
 ## Saving this locally
 ```bash
-$ git clone https://github.com/allendema/SnapScrap.py.git
-$ cd SnapScrap.py/
-$ pip3 install -r requirements.txt
+$ git clone https://github.com/llamagravy/SnapScrape.py.git
+$ pip3 install -r SnapScrape.py/requirements.txt
 ```
 
 ## Run it
 ```bash
 # Change to this directory & Make the script executable.
-$ cd SnapScrap.py  && chmod +x SnapScrap.py
+$ cd SnapScrape.py  && chmod +x SnapScrape.py
 
 # Run the script.
-$ python3 SnapScrap.py
+$ python3 SnapScrape.py
 
 # Alternative way to run.
-$ python3 SnapScrap.py USERNAME
+$ python3 SnapScrape.py <USERNAME>
 ```
 
 ## In Action
@@ -44,7 +43,8 @@ Made by exploring Python. Inspired by similiar programms. Use at own risk.
 
 
 Allen 2022
+llamagravy 2024
 
 
-[![License: Apache License 2.0](https://img.shields.io/github/license/allendema/SnapScrap.py)](https://github.com/allendema/SnapScrap.py/blob/main/LICENSE)
-[![github commits](https://img.shields.io/github/last-commit/allendema/SnapScrap.py)](https://github.com/allendema/SnapScrap.py/commits/main)
+[![License: Apache License 2.0](https://github.com/llamagravy/SnapScrape.py/blob/main/LICENSE)]
+[![github commits]]
