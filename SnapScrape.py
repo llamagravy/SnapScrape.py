@@ -247,6 +247,9 @@ def download_file(file_url, index):
             elif fs.startswith(b"\xFF\xD8\xFF\xFE\x00\x10\x4C\x61\x76\x63\x36\x30"):
                 print(f"{RED}File known to be encoded by lavc60. Guessing JPEG")
                 file_name = f"{file_name}.jpeg"
+            elif fs.startswith(b"\xFF\xD8\xFF\xFE\x00\x10\x4C\x61\x76\x63\x35\x39"):
+                print(f"{RED}File known to be encoded by lavc59. Guessing JPEG")
+                file_name = f"{file_name}.jpeg"
             else: 
                 if "SVG" in file_url:
                     print(f'{RED}Filetype could not be detected but "SVG" found in url. Guessing SVG')
