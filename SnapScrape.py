@@ -144,9 +144,8 @@ def download_media(json_dict=get_json()):
 
     # Curated Highlights
     try:
-        curated_highlights = json_dict["props"]["pageProps"]["curatedHighlights"]
-        if curated_highlights and isinstance(curated_highlights[0], dict):
-            snap_list = curated_highlights[0].get("snapList", [])
+        for i in json_dict["props"]["pageProps"]["curatedHighlights"]:
+            snap_list = i["snapList"]
             print(type(snap_list))  # Ensure this is aligned with the previous level
             for d in snap_list:
                 # Process each item in snapList
