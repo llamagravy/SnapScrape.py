@@ -86,7 +86,10 @@ def profile_metadata(json_dict=get_json()):
         # Download the images and media files using an index counter
         download_file(bitmoji, 1)
         download_file(pfp, 2)
-        download_file(hero, 3)
+        if hero == "":
+            print(f"{RED}No hero image found")
+        else:
+            download_file(hero, 3)
         download_file(ximage, 4)
         download_file(fbimage, 5)
 
