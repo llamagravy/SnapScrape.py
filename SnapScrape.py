@@ -50,11 +50,10 @@ def get_json():
     """Get JSON from Snapchat"""
     
     r = requests.get(mix, headers=headers)
-
     if r.ok:
         pass
     else:
-        sys.exit(f"{RED} Oh Snap! No connection with Snap!")
+        sys.exit(f"{RED}Unable to connect to Snapchat. Make sure the username is correct.")
 
     soup = BeautifulSoup(r.content, "html.parser")
     
