@@ -18,17 +18,17 @@ $ python3 SnapScrape.py
 # Alternative way to run.
 $ python3 SnapScrape.py <USERNAME>
 ```
-
-## In Action
-![inAction](https://github.com/allendema/SnapScrap.py/raw/main/example1.png)
-
-
-## Your directory later
-
-![Directory](https://github.com/allendema/SnapScrap.py/raw/main/example2.png)
-
-
-
+## Planned additions
+Plan to add flags with arguments for:  
+• Custom output directory  
+• Disabling file extension detection  
+• Getting specific collections i.e. only Curated Highlights or Story  
+  
+Other:  
+• Separate folders for story and curated highlights  
+• Add support for saving Lenses and Spotlight highlight  
+• Prevent download attempt when profile is unchanged   
+• Forced download of private profile's profile picture, background image, etc  
 
 ## Use it
 Just enter one username which has a Public Profile.  
@@ -44,7 +44,3 @@ Made by exploring Python. Inspired by similiar programms. Use at own risk.
 
 Allen 2022
 llamagravy 2024
-
-
-[![License: Apache License 2.0](https://github.com/llamagravy/SnapScrape.py/blob/main/LICENSE)]
-[![github commits]]
