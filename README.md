@@ -25,8 +25,6 @@ Plan to add flags with arguments for:
 • Getting specific collections i.e. only Curated Highlights or Story  
   
 Other:  
-• Separate folders for story and curated highlights  
-• Add support for saving Lenses and Spotlight highlight  
 • Prevent download attempt when profile is unchanged   
 • Forced download of private profile's profile picture, background image, etc  
 
