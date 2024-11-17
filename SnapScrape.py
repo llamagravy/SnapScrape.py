@@ -2,6 +2,8 @@
 __author__ = "https://codeberg.org/allendema" #modified by llamagravy
 
 from time import sleep
+import datetime
+import subprocess
 import time
 import json
 import sys
@@ -10,7 +12,6 @@ from requests.exceptions import ChunkedEncodingError
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urlparse
-
 
 def user_input():
     """Check for username argument
@@ -84,20 +85,22 @@ def profile_metadata(json_dict=get_json()):
         fbimage = json_dict['props']['pageProps']['linkPreview']['facebookImage']['url']
 
         # Download the images and media files using an index counter
-        download_file(bitmoji, 1)
-        download_file(pfp, 2)
+        timestamp = time.time()
+        
+        download_file(bitmoji, 1, 0)
+        download_file(pfp, 2, 0)
         if hero == "":
             print(f"{RED}No hero image found")
         else:
-            download_file(hero, 3)
-        download_file(ximage, 4)
-        download_file(fbimage, 5)
+            download_file(hero, 3, 0)
+        download_file(ximage, 4, 0)
+        if ximage != fbimage:
+            download_file(fbimage, 5, 0)
 
         # Save bio to a text file
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
-        
+
         with open(f"bio_{timestamp}.txt", "w") as bio_file:
-            bio_file.write(f"Bio of the user: {bio}\n")
+            bio_file.write(f"{bio}\n")
         
         print(f"{YELLOW}Bio saved to bio.txt: {bio}")
 
@@ -123,9 +126,18 @@ def download_media(json_dict=get_json()):
     indx = 10
     # Stories
     try:
+        cwd = os.getcwd()
+        if os.path.basename(cwd) in ("stories", "highlights", "spotlight", "lenses"):
+            os.chdir("..")
+
+        path = "stories"
+        if not os.path.exists(path):
+            os.mkdir(path)
+        os.chdir(path)
         for i in json_dict["props"]["pageProps"]["story"]["snapList"]:
             file_url = i["snapUrls"]["mediaUrl"]
             pre_url = i["snapUrls"]["mediaPreviewUrl"]["value"]
+            timestamp = i["timestampInSec"]["value"]
 
             if file_url == "":
                 print(f"{RED}There is a Story but no URL is provided by Snapchat.")
@@ -135,24 +147,76 @@ def download_media(json_dict=get_json()):
                 print(f"{RED}There is a Story thumbnail but no URL is provided by Snapchat.")
                 continue
 
-            indx = indx + 1
-            download_file(file_url, indx)
-            indx = indx + 1
-            download_file(pre_url, indx)
+            indx += 1
+            download_file(file_url, indx, timestamp)
+            indx += 1
+            download_file(pre_url, indx, timestamp)
 
     except KeyError as e:
         print(f"{RED}No temporary user stories found for the last 24h.")
     else:
         print(f"\n{YELLOW}Stories found. Successfully Downloaded.")
 
-    # Curated Highlights
+    # Spotlight Highlights
     try:
-        for i in json_dict["props"]["pageProps"]["curatedHighlights"]:
+        if json_dict["props"]["pageProps"]["spotlightHighlights"] == "":
+            print(f"{RED}There are no spotlight highlights found.")
+        cwd = os.getcwd()
+        if os.path.basename(cwd) in ("stories", "highlights", "spotlight", "lenses"):
+            os.chdir("..")
+
+        path = "spotlight"
+        if not os.path.exists(path):
+            os.mkdir(path)
+        os.chdir(path)
+        for i in json_dict["props"]["pageProps"]["spotlightHighlights"]:
             snap_list = i["snapList"]
             for d in snap_list:
                 # Process each item in snapList
                 file_url = d["snapUrls"]["mediaUrl"]
                 pre_url = d["snapUrls"]["mediaPreviewUrl"]["value"]
+                timestamp = d["timestampInSec"]["value"]
+                if file_url == "":
+                    print(f"{RED}There is a Spotlight Highlight but no URL is provided by Snapchat.")
+                    continue
+                if pre_url == "":
+                    print(f"{RED}There is a Spotlight Highlight thumbnail but no URL is provided by Snapchat.")
+                    continue
+
+                indx += 1
+                download_file(file_url, indx, timestamp)
+                indx += 1
+                download_file(pre_url, indx, timestamp)
+
+    except KeyError as e:
+        print(f"{RED}No spotlight highlights found. {e}")
+
+    # Curated Highlights
+    try:
+        if json_dict["props"]["pageProps"]["curatedHighlights"] == "":
+            print(f"{RED}There are no curated highlights found.")
+        cwd = os.getcwd()
+        if os.path.basename(cwd) in ("stories", "highlights", "spotlight", "lenses"):
+            os.chdir("..")
+
+        path = "highlights"
+        if not os.path.exists(path):
+            os.mkdir(path)
+        os.chdir(path)
+        for i in json_dict["props"]["pageProps"]["curatedHighlights"]:
+            snap_list = i["snapList"]
+            storytitle = i["storyTitle"]["value"]
+            cwd = os.getcwd()
+            if not os.path.basename(cwd) in ("stories", "highlights", "spotlight", "lenses"):
+                os.chdir("..")
+            if not os.path.exists(storytitle):
+                os.mkdir(storytitle)
+            os.chdir(storytitle)
+            for d in snap_list:
+                # Process each item in snapList
+                file_url = d["snapUrls"]["mediaUrl"]
+                pre_url = d["snapUrls"]["mediaPreviewUrl"]["value"]
+                timestamp = d["timestampInSec"]["value"]
                 if file_url == "":
                     print(f"{RED}There is a Curated Highlight but no URL is provided by Snapchat.")
                     continue
@@ -161,17 +225,51 @@ def download_media(json_dict=get_json()):
                     print(f"{RED}There is a Curated Highlight thumbnail but no URL is provided by Snapchat.")
                     continue
 
-                indx = indx + 1
-                download_file(file_url, indx)
-                indx = indx + 1
-                download_file(pre_url, indx)
+                indx += 1
+                download_file(file_url, indx, timestamp)
+                indx += 1
+                download_file(pre_url, indx, timestamp)
 
     except KeyError as e:
         print(f"{RED}No curated highlights found. {e}")
-    else:
-        print(f"\n{YELLOW}Curated highlights found. Successfully Downloaded.")
 
-def download_file(file_url, index):
+    # Lenses
+    try:
+        if json_dict["props"]["pageProps"]["lenses"] == "":
+            print(f"{RED}There are no lenses found.")
+        cwd = os.getcwd()
+        if os.path.basename(cwd) in ("stories", "highlights", "spotlight", "lenses"):
+            os.chdir("..")
+
+        path = "lenses"
+        if not os.path.exists(path):
+            os.mkdir(path)
+        os.chdir(path)
+        for i in json_dict["props"]["pageProps"]["lenses"]:
+            lpiu = i["lensPreviewImageUrl"]
+            lpvu = i["lensPreviewVideoUrl"]
+            iu = i["iconUrl"]
+            if lpiu == "":
+                print(f"{RED}There is a lense but no URL is provided by Snapchat.")
+                continue
+            if lpvu == "":
+                print(f"{RED}There is a lense but no URL is provided by Snapchat.")
+                continue
+            if iu == "":
+                print(f"{RED}There is a lense but no URL is provided by Snapchat.")
+                continue
+
+            indx += 1
+            download_file(lpiu, indx)
+            indx += 1
+            download_file(lpvu, indx)
+            indx += 1
+            download_file(iu, indx)
+
+    except KeyError as e:
+        print(f"{RED}No lenses found. {e}")
+
+def download_file(file_url, index, timest):
     """Function to download files."""
 
     # Send the requests to the URL
@@ -185,8 +283,14 @@ def download_file(file_url, index):
     if '?' in file_name:
         file_name = file_name.split('?')[0]
 
+    print(f"{YELLOW}[{index}] Downloading: {file_name}")
+    # Check if the file already exists
+    if any(File.startswith(file_name) for File in os.listdir(".")):
+        print(f"{YELLOW}[{index}] File {file_name} already exists. Skipping download.")
+        return
+
     # Check if file_name already has extension
-    allowed_extensions = [".jpeg", ".jp2", ".svg", ".mp4", ".mov", ".tiff", ".png", ".jpg"]
+    allowed_extensions = [".jpeg", ".jp2", ".svg", ".mp4", ".mov", ".tiff", ".png", ".jpg", ".webp"]
 
     def has_allowed_extension(file_name):
         return any(file_name.lower().endswith(ext) for ext in allowed_extensions)
@@ -197,11 +301,7 @@ def download_file(file_url, index):
 
             fs = t.raw.read(14)
 
-            if fs.startswith(b"\x00\x00\x00\x0C\x6A\x50\x20\x20\x0D\x0A\x87\x0A"):
-                file_name = f"{file_name}.jp2"
-            elif fs.startswith(b"\xFF\x4F\xFF\x51"):
-                file_name = f"{file_name}.jp2"
-            elif fs.startswith(b"\xFF\xD8\xFF\xE0"):
+            if fs.startswith(b"\xFF\xD8\xFF\xE0"):
                 file_name = f"{file_name}.jpeg"
             elif fs.startswith(b"\xFF\xD8\xFF\xDB"):
                 file_name = f"{file_name}.jpeg"
@@ -245,6 +345,9 @@ def download_file(file_url, index):
                 file_name = f"{file_name}.mov"
             elif fs.startswith(b'\x3c\x3f\x78\x6d\x6c\x20\x76\x65\x72\x73\x69\x6f\x6e'):
                 file_name = f"{file_name}.svg"
+            elif fs.startswith(b'\x52\x49\x46\x46'):
+                print(f"{RED}RIFF container found. Guessing webp.")
+                file_name = f"{file_name}.webp"
             elif fs.startswith(b"\xFF\xD8\xFF\xFE\x00\x10\x4C\x61\x76\x63\x36\x30"):
                 print(f"{RED}File known to be encoded by lavc60. Guessing JPEG")
                 file_name = f"{file_name}.jpeg"
@@ -262,13 +365,6 @@ def download_file(file_url, index):
                     print(f"{RED}Filetype unkown. File extension will not be added.")
         except Exception as e:
             print(f"{RED}Chunck read error: {e}")
-
-    print(f"{YELLOW}Downloading: {file_name}")
-
-    # Check if the file already exists
-    if os.path.isfile(file_name):
-        print(f"{YELLOW}File {file_name} already exists. Skipping download.")
-        return
 
     # Avoids being blocked by Snapchat servers
     sleep(0.3)
@@ -292,6 +388,12 @@ def download_file(file_url, index):
                 f.write(content)
         except Exception as e:
             print(f"{RED}error downloading {file_name} exeption {e}")
+    if timest == "":
+        return
+    elif timest == 0:
+        return
+    else:
+        os.utime(file_name, (int(timest), int(timest)))
 
 def main():
     start = time.perf_counter()
